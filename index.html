@@ -131,7 +131,7 @@ td.use span{display:inline-block;border-radius:9px;padding:1px 7px;margin:1px 2p
 
   <h3>地圖範圍（本層）</h3>
   <label class="lbl" style="margin-top:0">長寬比例</label>
-  <div class="seg" id="ratioSeg" style="flex-wrap:wrap"><button data-v="free">原圖</button><button data-v="16:9">16:9</button><button data-v="4:3">4:3</button><button data-v="1:1">1:1</button><button data-v="a4l">A4橫</button><button data-v="2:1">2:1</button><button data-v="3:1">3:1狹長</button><button data-v="custom">自訂</button></div>
+  <select id="ratioSel" class="btn sm" style="width:100%;text-align:left"><option value="free">原圖比例</option><option value="16:9">16:9（簡報）</option><option value="4:3">4:3</option><option value="1:1">1:1（方形）</option><option value="a4l">A4 橫式</option><option value="2:1">2:1（寬）</option><option value="3:1">3:1（狹長）</option><option value="custom">自訂…</option></select>
   <div id="customBox" style="display:none;margin-top:6px;font-size:12.5px;align-items:center;gap:5px">寬<input type="number" id="cW" min="1" step="1" style="width:62px" class="btn sm">：高<input type="number" id="cH" min="1" step="1" style="width:62px" class="btn sm"><span style="color:var(--muted)">（可填比例或像素）</span></div>
   <label class="lbl">縮放 <span id="zoomV"></span></label>
   <div style="display:flex;gap:6px;align-items:center"><button class="btn sm" id="zOut2">－</button><input type="range" id="zoomR" min="100" max="400" step="5" style="flex:1"><button class="btn sm" id="zIn2">＋</button></div>
@@ -154,6 +154,10 @@ td.use span{display:inline-block;border-radius:9px;padding:1px 7px;margin:1px 2p
   <div class="seg" id="ltSeg"><button data-v="auto">自動</button><button data-v="black">黑字</button><button data-v="white">白字</button><button data-v="custom">自訂</button></div>
   <input type="color" id="ltCol" style="display:none;margin-top:5px;width:100%;height:26px;border:1px solid var(--line);border-radius:6px"></div>
   <div style="height:8px"></div>
+  <label class="lbl" style="margin-top:0">分類（全營共用，決定標籤外框顏色）</label>
+  <div id="catList"></div>
+  <div class="row" style="margin-top:4px"><button class="btn sm" id="addCat">＋ 新增分類</button><button class="btn sm" id="recolor" title="依分類把本層圖例重新配成同色系深淺">依分類重新配色本層</button></div>
+  <label class="lbl" style="display:flex;align-items:center">本層圖例<span style="flex:1"></span><label style="font-size:11.5px;display:flex;gap:4px;align-items:center"><input type="checkbox" id="legAll">顯示空分類</label></label>
   <div id="legend"></div>
   <div class="row"><button class="btn sm" id="addLeg">＋ 新增圖例</button></div>
   <h3>本層路線、站點與棚子</h3>
@@ -172,8 +176,9 @@ td.use span{display:inline-block;border-radius:9px;padding:1px 7px;margin:1px 2p
   <input type="range" id="fillK" min="20" max="100" step="5" style="width:100%">
   <label class="lbl">建築標籤</label>
   <div class="seg" id="badgeSeg">
-    <button data-v="id">編號</button><button data-v="official">官方名</button><button data-v="camp">營會用名</button><button data-v="legend">圖例</button><button data-v="none">關</button>
+    <button data-v="id">編號</button><button data-v="official">官方名</button><button data-v="camp">營會用名</button><button data-v="legend">圖例</button>
   </div>
+  <div style="font-size:11.5px;color:var(--muted);margin-top:4px">可複選。勾「圖例」再勾名稱，建築名稱會成為卡片標題；全部取消＝不顯示標籤。</div>
   <label class="lbl">標籤位置</label>
   <div class="seg" id="placeSeg"><button data-v="on">建築上</button><button data-v="around">建築周圍</button></div>
   <label class="lbl">標籤範圍</label>
@@ -189,18 +194,19 @@ td.use span{display:inline-block;border-radius:9px;padding:1px 7px;margin:1px 2p
       <label class="lbl">團隊密碼（沒設可留空）</label><input id="cKey" class="btn sm" style="width:100%;text-align:left">
       <div class="row"><button class="btn sm pri" id="cSave">儲存設定</button></div>
     </div>
-    <label class="lbl" style="margin-top:0">你的名字（顯示是誰上傳的）</label><input id="cBy" class="btn sm" style="width:100%;text-align:left" placeholder="例如：小海豚">
+    <label class="lbl" style="margin-top:0">你的名字（顯示是誰上傳的）</label><input id="cBy" class="btn sm" style="width:100%;text-align:left" placeholder="例如：浩文">
     <div class="row"><button class="btn sm pri" id="cUp">上傳本層</button><button class="btn sm" id="cUpS" title="建築名稱、地標">上傳主檔與地標</button></div>
     <div class="row"><button class="btn sm" id="cRefresh">重新整理清單</button><button class="btn sm" id="cAll">全部載入</button><button class="btn sm" id="cCfg">設定</button></div>
     <div id="cList" style="margin-top:6px;border:1px solid var(--line);border-radius:7px;max-height:220px;overflow:auto"></div>
-    <div class="hint">全中門同工在完成各部地圖配置後可以按「上傳本層」，同名圖層（eg.輔導部）會被更新；其他人按「載入」就會拿到最新版，載入會取代目前顯示的同名圖層。</div>
+    <div class="hint">各部畫好後按「上傳本層」，同名圖層會被更新；其他人按「載入」就會拿到最新版。載入會取代你這台電腦上同名的圖層。</div>
   </div>
 
   <h3>匯出／分享</h3>
   <div class="row">
     <button class="btn pri" id="pngBtn">匯出 PNG（目前可見圖層）</button>
   </div>
-  <label style="display:flex;gap:6px;align-items:center;font-size:12.5px;margin-top:6px"><input type="checkbox" id="expLN">匯出圖例時顯示圖層名稱</label>
+  <label style="display:flex;gap:6px;align-items:center;font-size:12.5px;margin-top:6px"><input type="checkbox" id="expBN">匯出圖例附上建築名稱</label>
+  
   <div class="row">
   </div>
   <div class="row">
@@ -320,7 +326,7 @@ function freshState(){
     L("行政部",LAYER_COLORS[3],[leg("報到處","#1a6a88"),leg("遊覽車停靠","#efa147"),leg("器材倉","#7a868c")]),
     L("家長接送（對外）",LAYER_COLORS[4],[leg("接送點","#e4572e"),leg("報到處","#1a6a88"),leg("車輛動線","#efa147")])
   ];
-  return {v:1,actPreset:1,buildings:b,layers:layers,active:layers[0].id,tool:"paint",base:"gray",badge:"none",lblScope:"all",labelPos:{},title:"",idv:3,cv:2,pois:defaultPois()};
+  return {v:1,actPreset:1,buildings:b,layers:layers,active:layers[0].id,tool:"paint",base:"gray",badge:"none",badgeSet:{},lblScope:"all",labelPos:{},title:"",idv:3,cv:2,pois:defaultPois()};
 }
 
 var S;
@@ -330,8 +336,8 @@ function load(){
 }
 var saveT;
 var UNDO=[],REDO=[],lastSnap=null;
-function snap(){return JSON.stringify({layers:S.layers,buildings:S.buildings,labelPos:S.labelPos||{},labelPosOn:S.labelPosOn||{},pois:S.pois||[]})}
-function restoreSnap(j){var o=JSON.parse(j);S.layers=o.layers;S.buildings=o.buildings;S.labelPos=o.labelPos;S.labelPosOn=o.labelPosOn;S.pois=o.pois;if(!S.layers.some(function(l){return l.id===S.active}))S.active=S.layers[0].id;lastSnap=j;drawing=null;
+function snap(){return JSON.stringify({layers:S.layers,buildings:S.buildings,labelPos:S.labelPos||{},labelPosOn:S.labelPosOn||{},pois:S.pois||[],cats:S.cats||null})}
+function restoreSnap(j){var o=JSON.parse(j);S.layers=o.layers;S.buildings=o.buildings;S.labelPos=o.labelPos;S.labelPosOn=o.labelPosOn;S.pois=o.pois;if(o.cats)S.cats=o.cats;if(!S.layers.some(function(l){return l.id===S.active}))S.active=S.layers[0].id;lastSnap=j;drawing=null;
   try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}renderTable();renderAll()}
 function undo(){if(!UNDO.length){toast("沒有可以復原的動作");return}REDO.push(lastSnap);restoreSnap(UNDO.pop());toast("已復原");updUndo()}
 function redo(){if(!REDO.length)return;UNDO.push(lastSnap);restoreSnap(REDO.pop());toast("已重做");updUndo()}
@@ -395,23 +401,27 @@ function hit(a,b,m){return a[0]-m<b[2]&&a[2]+m>b[0]&&a[1]-m<b[3]&&a[3]+m>b[1]}
 function paintedSet(){var o={};S.layers.forEach(function(l){if(l.visible)Object.keys(l.fills).forEach(function(b){if(fl(l,b).some(function(id){return legOf(l,id)}))o[b]=1})});return o}
 var LC={key:"",res:[]};
 function lpStore(){if(S.lblPlace==="on"){S.labelPosOn=S.labelPosOn||{};return S.labelPosOn}S.labelPos=S.labelPos||{};return S.labelPos}
+function bset(){if(!S.badgeSet||typeof S.badgeSet!=="object"){var m={id:{id:1},official:{official:1},camp:{camp:1},legend:{legend:1,official:1},none:{}};S.badgeSet=m[S.badge]||{official:1}}return S.badgeSet}
+function nameOf(k){var bs=bset(),B=S.buildings[k]||{},p=[],on=shortName(B.official);if(bs.id)p.push(k);if(bs.official&&on)p.push(on);if(bs.camp&&B.camp&&!(bs.official&&B.camp===on))p.push(B.camp);return p.join(" ")}
 function labelItems(){
-  if(S.badge==="none")return [];
-  if(S.badge==="legend"){
+  var bs=bset(),out=[],used={};
+  if(bs.legend){
     var per={},order=[];
     S.layers.forEach(function(l){if(!l.visible)return;
       Object.keys(l.fills).forEach(function(b){if(!CEN[b]||isHid(b))return;fl(l,b).forEach(function(id){var g=legOf(l,id);if(!g)return;
-        if(!per[b]){per[b]=[];order.push(b)}per[b].push({t:legText(g),color:g.color,v:g.venue||g.label||"",st:l.lblStyle||"dot",tc:l.lblText||"auto"})})})});
+        if(!per[b]){per[b]=[];order.push(b)}var ct=catOf(l,g);per[b].push({cid:ct.id,fc:ct.c,t:legText(g),color:g.color,v:g.venue||g.label||"",st:l.lblStyle||"dot",tc:l.lblText||"auto"})})})});
     function fk(v){var m=/^\s*B(\d+)/i.exec(v);if(m)return -(+m[1]);m=/^\s*(\d+)\s*F/i.exec(v);if(m)return +m[1];return 99}
-    return order.map(function(b){var rows=per[b];
-      if(rows.length===1)return {key:b+"|1",b:b,t:rows[0].t,color:rows[0].color,st:rows[0].st,tc:rows[0].tc};
+    order.forEach(function(b){var rows=per[b],title=nameOf(b);used[b]=1;
+      if(rows.length===1&&!title){out.push({key:b+"|1",b:b,t:rows[0].t,color:rows[0].color,fc:rows[0].fc,st:rows[0].st,tc:rows[0].tc});return}
       rows=rows.map(function(r,i){r.i=i;return r}).sort(function(a,c){return fk(a.v)-fk(c.v)||a.i-c.i});
-      var B=S.buildings[b]||{};
-      return {key:b+"|card",b:b,title:B.camp||shortName(B.official)||b,rows:rows};
+      out.push({key:b+"|card",b:b,title:title,rows:rows});
     });
   }
-  var ps=S.lblScope==="painted"?paintedSet():null;
-  return visIDS().filter(function(k){return !ps||ps[k]}).map(function(k){return {key:k,b:k,t:labelText(k),st:act().lblStyle||"dot",tc:act().lblText||"auto"}});
+  if(bs.id||bs.official||bs.camp){
+    var ps=S.lblScope==="painted"?paintedSet():null;
+    visIDS().forEach(function(k){if(used[k]||(ps&&!ps[k]))return;var t=nameOf(k);if(t)out.push({key:k,b:k,t:t,st:act().lblStyle||"dot",tc:act().lblText||"auto"})});
+  }
+  return out;
 }
 function layoutLabels(){
   if(!OCC)return [];
@@ -423,12 +433,12 @@ function layoutLabels(){
   var ON=S.lblPlace==="on",LP=lpStore();
   var CB=cropRect()||[0,0,W,H];CB=[Math.max(0,CB[0]),Math.max(0,CB[1]),Math.min(W,CB[2]),Math.min(H,CB[3])];
   items=items.filter(function(it){var c=CEN[it.b];return c[0]>=CB[0]&&c[0]<=CB[2]&&c[1]>=CB[1]&&c[1]<=CB[3]});
-  var key=S.badge+"|"+(ON?"on":"ar")+"|"+CB.join(",")+"|"+JSON.stringify(items)+"|"+JSON.stringify(LP)+"|"+JSON.stringify(obs);
+  var key=JSON.stringify(bset())+"|"+(ON?"on":"ar")+"|"+CB.join(",")+"|"+JSON.stringify(items)+"|"+JSON.stringify(LP)+"|"+JSON.stringify(obs);
   if(key===LC.key)return LC.res;
   var placed=[],res=[],segs=[];
-  function hOf(it){if(it.rows){var h=30;it.rows.forEach(function(r){h+=19+(nl(r.t)-1)*15});return h}return 22+(nl(it.t)-1)*15}
-  function mk(it,cx,cy,w){var h=hOf(it);return {k:it.key,b:it.b,t:it.t,color:it.color,st:it.st,tc:it.tc,title:it.title,rows:it.rows,cx:cx,cy:cy,w:w,h:h,r:[cx-w/2,cy-h/2,cx+w/2,cy+h/2]}}
-  function wOf(it){if(it.rows){var m=textW(it.title)+20;it.rows.forEach(function(r){m=Math.max(m,mtw(r.t)+(r.st==="dot"?36:22))});return m}return mtw(it.t)+18+(it.color&&(it.st||"dot")==="dot"?14:0)}
+  function hOf(it){if(it.rows){var h=it.title?30:10;it.rows.forEach(function(r){h+=19+(nl(r.t)-1)*15});return h}return 22+(nl(it.t)-1)*15}
+  function mk(it,cx,cy,w){var h=hOf(it);return {k:it.key,b:it.b,t:it.t,color:it.color,fc:it.fc,st:it.st,tc:it.tc,title:it.title,rows:it.rows,cx:cx,cy:cy,w:w,h:h,r:[cx-w/2,cy-h/2,cx+w/2,cy+h/2]}}
+  function wOf(it){if(it.rows){var m=it.title?textW(it.title)+20:0;it.rows.forEach(function(r){m=Math.max(m,mtw(r.t)+(r.st==="dot"?36:22))});return m}return mtw(it.t)+18+(it.color&&(it.st||"dot")==="dot"?14:0)}
   items.forEach(function(it){var p=LP[it.key];if(p){var L=mk(it,p.x,p.y,wOf(it));placed.push(L.r);res.push(L)}});
   var auto=items.filter(function(it){return !LP[it.key]});
   function nearB(b,x,y){var pts=BND[b],bd=1e9,a=CEN[b];for(var i=0;i<pts.length;i++){var d=(pts[i][0]-x)*(pts[i][0]-x)+(pts[i][1]-y)*(pts[i][1]-y);if(d<bd){bd=d;a=pts[i]}}return a}
@@ -480,26 +490,40 @@ function layoutLabels(){
   });
   LC={key:key,res:res};return res;
 }
+var DEF_CATS=[{id:"common",n:"共同",c:"#5b6b75"},{id:"admin",n:"行政",c:"#1a6a88"},{id:"prog",n:"節目（活動）",c:"#d9532c"},{id:"care",n:"輔導",c:"#5f8f3e"}];
+function cats(){if(!Array.isArray(S.cats)||!S.cats.length)S.cats=JSON.parse(JSON.stringify(DEF_CATS));return S.cats}
+function catById(id){return cats().filter(function(c){return c.id===id})[0]}
+function inferCat(n){n=n||"";if(/行政/.test(n))return "admin";if(/活動|節目/.test(n))return "prog";if(/輔導/.test(n))return "care";return "common"}
+function catOf(l,g){return (g&&g.cat&&catById(g.cat))||catById(inferCat(l.name))||cats()[0]}
+function hsl(c){var r=hex2rgb(c).map(function(v){return v/255}),mx=Math.max.apply(null,r),mn=Math.min.apply(null,r),h=0,s2=0,L=(mx+mn)/2,d=mx-mn;
+  if(d){s2=L>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r[0]?(r[1]-r[2])/d+(r[1]<r[2]?6:0):mx===r[1]?(r[2]-r[0])/d+2:(r[0]-r[1])/d+4;h/=6}return [h,s2,L]}
+function hex(h,s2,L){function f(n){var k=(n+h*12)%12,a=s2*Math.min(L,1-L);return Math.round(255*(L-a*Math.max(-1,Math.min(k-3,9-k,1)))).toString(16).padStart(2,"0")}return "#"+f(0)+f(8)+f(4)}
+function shades(c,n){var p=hsl(c),out=[];for(var i=0;i<n;i++){var t=n===1?0:i/(n-1);out.push(hex((p[0]+(t-.5)*.06+1)%1,Math.min(.9,p[1]*(0.85+.3*(1-t))),Math.max(.22,Math.min(.78,.3+t*.42))))}return out}
 function legText(g){var v=g.venue||"",l=g.label||"";if(!g.wrap)return (v?v+"｜":"")+l;
   if(v&&l)return v+"\n"+l;var t=v||l,i=t.indexOf("｜");if(i>0)return t.slice(0,i)+"\n"+t.slice(i+1);var m=Math.ceil(t.length/2);return t.slice(0,m)+"\n"+t.slice(m)}
 function nl(t){return String(t||"").split("\n").length}
 function mtw(t){return Math.max.apply(null,String(t||"").split("\n").map(textW))}
 function tsp(x,y,t,attrs){var ls=String(t||"").split("\n");return '<text x="'+x+'" y="'+y+'" '+attrs+' font-size="12" font-weight="700" font-family="'+FONTS+'">'+ls.map(function(q,i){return '<tspan x="'+x+'"'+(i?' dy="15"':'')+'>'+esc(q)+'</tspan>'}).join("")+'</text>'}
+function bnames(l,gid){var hs=l.hideB||{},ns=[];Object.keys(l.fills).forEach(function(b){if(hs[b]||!S.buildings[b])return;if(fl(l,b).indexOf(gid)>=0){var B=S.buildings[b];ns.push(B.camp||shortName(B.official)||b)}});return ns.length?"　＠"+ns.join("、"):""}
 function txtOn(bg,tc){if(tc==="black")return "#22313a";if(tc==="white")return "#ffffff";if(tc&&tc[0]==="#")return tc;var c=hex2rgb(bg),L=(.2126*c[0]+.7152*c[1]+.0722*c[2])/255;return L>.6?"#22313a":"#ffffff"}
 function darkTxt(c){var r=hex2rgb(c),L=(.2126*r[0]+.7152*r[1]+.0722*r[2])/255;if(L<.42)return c;var k=.42/L;return "rgb("+r.map(function(v){return Math.round(v*k)}).join(",")+")"}
 function badgeSvg(){
   var s="";
   layoutLabels().forEach(function(L){
-    var lc=L.color||"#1a6a88",f=function(v){return v.toFixed(1)};
+    var f=function(v){return v.toFixed(1)},mixed=false,cc="#1a6a88";
+    if(L.rows){var ids={};L.rows.forEach(function(r){ids[r.cid]=r.fc});var ks=Object.keys(ids);if(ks.length===1)cc=ids[ks[0]];else mixed=ks.length>1}
+    var lc=L.rows?cc:(((L.st||"dot")==="dot"&&L.fc)?L.fc:(L.color||"#1a6a88"));
     var line=L.inside?"":'<line x1="'+f(L.ax)+'" y1="'+f(L.ay)+'" x2="'+f(L.ex)+'" y2="'+f(L.ey)+'" stroke="#fff" stroke-width="4" stroke-linecap="round"/><line x1="'+f(L.ax)+'" y1="'+f(L.ay)+'" x2="'+f(L.ex)+'" y2="'+f(L.ey)+'" stroke="'+lc+'" stroke-width="1.6"/><circle cx="'+f(L.ax)+'" cy="'+f(L.ay)+'" r="3.4" fill="'+lc+'" stroke="#fff" stroke-width="1.5"/>';
     var body;
     if(L.rows){
-      var x0=L.r[0],y0=L.r[1];
-      body='<rect x="'+f(x0)+'" y="'+f(y0)+'" width="'+f(L.w)+'" height="'+f(L.h)+'" rx="8" fill="#fff" stroke="#1a6a88" stroke-width="1.6"/>'+
-        '<path d="M'+f(x0)+' '+f(y0+22)+' V'+f(y0+8)+' Q'+f(x0)+' '+f(y0)+' '+f(x0+8)+' '+f(y0)+' H'+f(x0+L.w-8)+' Q'+f(x0+L.w)+' '+f(y0)+' '+f(x0+L.w)+' '+f(y0+8)+' V'+f(y0+22)+' Z" fill="#1a6a88"/>'+
-        '<text x="'+f(x0+10)+'" y="'+f(y0+15.5)+'" font-size="12" font-weight="700" fill="#fff" font-family="'+FONTS+'">'+esc(L.title)+'</text>';
-      var yy=y0+26;
+      var x0=L.r[0],y0=L.r[1],HD=L.title?26:6;
+      body='<rect x="'+f(x0)+'" y="'+f(y0)+'" width="'+f(L.w)+'" height="'+f(L.h)+'" rx="8" fill="#fff" stroke="'+cc+'" stroke-width="1.8"/>'+
+        '<path d="M'+f(x0)+' '+f(y0+22)+' V'+f(y0+8)+' Q'+f(x0)+' '+f(y0)+' '+f(x0+8)+' '+f(y0)+' H'+f(x0+L.w-8)+' Q'+f(x0+L.w)+' '+f(y0)+' '+f(x0+L.w)+' '+f(y0+8)+' V'+f(y0+22)+' Z" fill="'+cc+'"/>'+
+        '<text x="'+f(x0+10)+'" y="'+f(y0+15.5)+'" font-size="12" font-weight="700" fill="'+txtOn(cc,"auto")+'" font-family="'+FONTS+'">'+esc(L.title)+'</text>';
+      if(!L.title)body='<rect x="'+f(x0)+'" y="'+f(y0)+'" width="'+f(L.w)+'" height="'+f(L.h)+'" rx="8" fill="#fff" stroke="'+cc+'" stroke-width="1.8"/>';
+      var yy=y0+HD;
       L.rows.forEach(function(r){var n=nl(r.t),rh=19+(n-1)*15,ry=yy+9;yy+=rh;
+        if(mixed)body+='<rect x="'+f(x0+1.5)+'" y="'+f(ry-8.5)+'" width="3.5" height="'+(17+(n-1)*15)+'" rx="1.5" fill="'+r.fc+'"/>';
         if(r.st==="solid")body+='<rect x="'+f(x0+5)+'" y="'+f(ry-8.5)+'" width="'+f(L.w-10)+'" height="'+(17+(n-1)*15)+'" rx="4" fill="'+r.color+'"/>'+tsp(f(x0+11),f(ry+4.2),r.t,'fill="'+txtOn(r.color,r.tc)+'"');
         else if(r.st==="outline")body+='<rect x="'+f(x0+5)+'" y="'+f(ry-8.5)+'" width="'+f(L.w-10)+'" height="'+(17+(n-1)*15)+'" rx="4" fill="#fff" stroke="'+r.color+'" stroke-width="1.4"/>'+tsp(f(x0+11),f(ry+4.2),r.t,'fill="'+darkTxt(r.color)+'"');
         else body+='<circle cx="'+f(x0+14)+'" cy="'+f(ry)+'" r="5" fill="'+r.color+'"/>'+tsp(f(x0+25),f(ry+4.2),r.t,'fill="#22313a"')});
@@ -510,7 +534,7 @@ function badgeSvg(){
     var rect=function(fill,stroke,sw){return '<rect x="'+f(L.r[0])+'" y="'+f(L.r[1])+'" width="'+f(L.w)+'" height="'+hh+'" rx="'+rx+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>'};
     if(st==="solid")body=rect(lc,"#fff",1.5)+tsp(f(L.cx),by,L.t,'text-anchor="middle" fill="'+txtOn(lc,L.tc)+'"');
     else if(st==="outline")body=rect("#fff",lc,1.8)+tsp(f(L.cx),by,L.t,'text-anchor="middle" fill="'+darkTxt(lc)+'"');
-    else if(L.color)body=rect("#fff",lc,1.6)+'<circle cx="'+f(L.r[0]+12)+'" cy="'+f(L.r[1]+11)+'" r="5.5" fill="'+L.color+'"/>'+tsp(f(L.r[0]+22),by,L.t,'fill="#22313a"');
+    else if(L.color)body=rect("#fff",lc,1.8)+'<circle cx="'+f(L.r[0]+12)+'" cy="'+f(L.r[1]+11)+'" r="5.5" fill="'+L.color+'"/>'+tsp(f(L.r[0]+22),by,L.t,'fill="#22313a"');
     else body=rect("#fff",lc,1.6)+tsp(f(L.cx),by,L.t,'text-anchor="middle" fill="#1a6a88"');
     s+='<g class="lbl" data-lb="'+esc(L.k)+'" style="cursor:move">'+line+body+'</g>';
   });
@@ -595,7 +619,7 @@ function applyStage(){var cr=cropRect(),mb=$("mapbox"),st=$("stage");var pp=pape
 function toBX(x){var r=anno.getBoundingClientRect(),b=$("mapbox").getBoundingClientRect();return r.left-b.left+x/W*r.width}
 function toBY(y){var r=anno.getBoundingClientRect(),b=$("mapbox").getBoundingClientRect();return r.top-b.top+y/H*r.height}
 function renderFocusUI(){var v=vw(),hs=act().hideB||{};
-  [].forEach.call($("ratioSeg").children,function(b){b.classList.toggle("on",b.dataset.v===v.ratio)});
+  $("ratioSel").value=v.ratio;
   if(!RATIOS[v.ratio]&&v.ratio!=="custom")v.ratio="free";
   $("customBox").style.display=v.ratio==="custom"?"flex":"none";$("cW").value=v.cw||22;$("cH").value=v.ch||10;
   $("zoomR").value=Math.round((v.z||1)*100);$("zoomV").textContent=Math.round((v.z||1)*100)+"%";
@@ -684,16 +708,23 @@ function renderSide(){
     '</div>';
   });
   $("layers").innerHTML=h;
-  $("legLayerName").textContent=A.name;$("expLN").checked=!!S.expLayerName;
+  $("legLayerName").textContent=A.name;$("expBN").checked=S.expBName!==false;
   var lst=A.lblStyle||"dot",ltc=A.lblText||"auto",ltm=ltc[0]==="#"?"custom":ltc;
   [].forEach.call($("lsSeg").children,function(b){b.classList.toggle("on",b.dataset.v===lst)});
   $("ltBox").style.display=lst==="solid"?"block":"none";
   [].forEach.call($("ltSeg").children,function(b){b.classList.toggle("on",b.dataset.v===ltm)});
   $("ltCol").style.display=ltm==="custom"?"block":"none";if(ltm==="custom")$("ltCol").value=ltc;
   var g=curLeg(),lh="";
-  A.legend.forEach(function(x){
-    lh+='<div class="leg'+(g&&x.id===g.id?' cur':'')+'" data-leg="'+x.id+'"><input type="color" value="'+x.color+'" data-col="'+x.id+'"><div class="legtx"><input type="text" value="'+esc(x.label)+'" data-lab="'+x.id+'" placeholder="圖例說明（例：撒都該人）"><input type="text" class="ven" value="'+esc(x.venue||"")+'" data-ven="'+x.id+'" placeholder="地點（選填，例：土木講堂）"></div><button class="x" data-wrap="'+x.id+'" title="標籤折成兩行" style="font-size:13px;'+(x.wrap?'color:#fff;background:var(--navy);border-radius:4px':'')+'">↵</button><button class="x" data-rm="'+x.id+'" title="刪除圖例">×</button></div>';
+  var grpL={};A.legend.forEach(function(x){var c=catOf(A,x);(grpL[c.id]=grpL[c.id]||[]).push(x)});
+  var multi=Object.keys(grpL).length>1||S.legGroupAll;
+  cats().forEach(function(cg){var arr=grpL[cg.id]||[];if(!arr.length&&!S.legGroupAll)return;
+    lh+='<div style="display:flex;align-items:center;gap:6px;margin:8px 0 3px;font-size:12px;font-weight:700;color:'+cg.c+'"><i style="width:4px;height:14px;background:'+cg.c+';border-radius:2px"></i>'+esc(cg.n)+'<span style="color:var(--muted);font-weight:400">'+arr.length+'</span><span style="flex:1"></span><button class="btn sm" data-addin="'+cg.id+'" style="padding:1px 7px" title="在此分類新增圖例">＋</button></div>';
+    arr.forEach(function(x){
+    lh+='<div class="leg'+(g&&x.id===g.id?' cur':'')+'" data-leg="'+x.id+'"><input type="color" value="'+x.color+'" data-col="'+x.id+'"><div class="legtx"><input type="text" value="'+esc(x.label)+'" data-lab="'+x.id+'" placeholder="圖例說明（例：撒都該人）"><input type="text" class="ven" value="'+esc(x.venue||"")+'" data-ven="'+x.id+'" placeholder="地點（選填，例：土木講堂）"><select data-cat="'+x.id+'" style="font-size:11.5px;border:1px solid var(--line);border-radius:4px;margin-top:2px;color:'+catOf(A,x).c+'">'+cats().map(function(c){return '<option value="'+c.id+'"'+(catOf(A,x).id===c.id?' selected':'')+' style="color:'+c.c+'">■ '+esc(c.n)+'</option>'}).join("")+'</select></div><button class="x" data-wrap="'+x.id+'" title="標籤折成兩行" style="font-size:13px;'+(x.wrap?'color:#fff;background:var(--navy);border-radius:4px':'')+'">↵</button><button class="x" data-rm="'+x.id+'" title="刪除圖例">×</button></div>';
+    });
   });
+  $("legAll").checked=!!S.legGroupAll;
+  $("catList").innerHTML=cats().map(function(c){return '<div class="leg" style="cursor:default"><input type="color" value="'+c.c+'" data-cc="'+c.id+'"><input type="text" value="'+esc(c.n)+'" data-cn="'+c.id+'" style="flex:1"><button class="x" data-cdel="'+c.id+'" title="刪除分類">×</button></div>'}).join("");
   $("legend").innerHTML=lh||'<div class="hint">本層還沒有圖例，先新增一個再開始畫。</div>';
   $("curLayer").textContent=A.name;
   renderFocusUI();
@@ -709,7 +740,7 @@ function renderSide(){
   $("curLeg").innerHTML=g?'<i style="background:'+g.color+'"></i>'+esc(g.label||"（未命名）"):"—";
   renderTools();
   [].forEach.call($("baseSeg").children,function(b){b.classList.toggle("on",b.dataset.v===S.base)});
-  [].forEach.call($("badgeSeg").children,function(b){b.classList.toggle("on",b.dataset.v===S.badge)});
+  var BS=bset();[].forEach.call($("badgeSeg").children,function(b){b.classList.toggle("on",!!BS[b.dataset.v])});
   $("fillK").value=Math.round((S.fillK==null?0.45:S.fillK)*100);$("fkv").textContent=$("fillK").value+"%";
   var pv=S.showPoi===false?"off":(S.poiLabel===false?"icon":"on");[].forEach.call($("poiSeg").children,function(b){b.classList.toggle("on",b.dataset.v===pv)});
   [].forEach.call($("placeSeg").children,function(b){b.classList.toggle("on",b.dataset.v===(S.lblPlace||"around"))});
@@ -990,7 +1021,7 @@ $("poiNone").onclick=function(){var h={};(S.pois||[]).forEach(function(p){h[p.id
 function setZ(z,cx,cy){var v=vw();v.z=Math.max(1,Math.min(4,z));if(cx!=null){v.cx=cx;v.cy=cy}clampView(v);save();renderMap();renderFocusUI()}
 function cust(){var v=vw();v.cw=+$("cW").value||1;v.ch=+$("cH").value||1;clampView(v);save();renderMap()}
 $("cW").oninput=cust;$("cH").oninput=cust;
-$("ratioSeg").onclick=function(e){var r=e.target.dataset.v;if(!r)return;var v=vw();v.ratio=r;if(r==="custom"&&!v.cw){v.cw=22;v.ch=10}clampView(v);save();renderAll()};
+$("ratioSel").onchange=function(){var r=this.value;var v=vw();v.ratio=r;if(r==="custom"&&!v.cw){v.cw=22;v.ch=10}clampView(v);save();renderAll()};
 $("zoomR").oninput=function(){setZ(this.value/100)};
 $("zIn2").onclick=function(){setZ((vw().z||1)*1.25)};
 $("zOut2").onclick=function(){setZ((vw().z||1)/1.25)};
@@ -1011,20 +1042,32 @@ $("mapbox").addEventListener("wheel",function(e){if(S.tool!=="pan"&&!e.ctrlKey&&
 $("lsSeg").onclick=function(e){var v=e.target.dataset.v;if(!v)return;act().lblStyle=v;save();renderAll()};
 $("ltSeg").onclick=function(e){var v=e.target.dataset.v;if(!v)return;act().lblText=v==="custom"?($("ltCol").value&&$("ltCol").value!=="#000000"?$("ltCol").value:"#fff3c4"):v;save();renderAll()};
 $("ltCol").oninput=function(){act().lblText=this.value;save();renderMap()};
-$("expLN").onchange=function(){S.expLayerName=this.checked;save()};
+$("expBN").onchange=function(){S.expBName=this.checked;save()};
 $("undoBtn").onclick=undo;$("redoBtn").onclick=redo;
+$("legend").addEventListener("change",function(e){var id=e.target.dataset.cat;if(!id)return;var g=legOf(act(),id);g.cat=e.target.value;save();renderAll()});
+$("catList").addEventListener("input",function(e){var t=e.target,c;if(t.dataset.cc){c=catById(t.dataset.cc);c.c=t.value;save();renderMap()}if(t.dataset.cn){c=catById(t.dataset.cn);c.n=t.value;save()}});
+$("catList").addEventListener("change",function(){renderSide()});
+$("catList").addEventListener("click",function(e){var id=e.target.dataset.cdel;if(!id)return;if(cats().length<=1){toast("至少保留一個分類");return}
+  S.cats=cats().filter(function(c){return c.id!==id});S.layers.forEach(function(l){l.legend.forEach(function(g){if(g.cat===id)delete g.cat})});save();renderAll();toast("已刪除分類（可按復原）")});
+$("addCat").onclick=function(){var pal=["#8e5bd6","#e0a100","#c2185b","#00897b","#6d4c41"],n=cats().length;cats().push({id:"c"+uid(),n:"新分類",c:pal[n%pal.length]});save();renderAll();var ins=document.querySelectorAll("[data-cn]");var last=ins[ins.length-1];if(last){last.focus();last.select()}};
+$("recolor").onclick=function(){var A=act(),grp={};A.legend.forEach(function(g){var c=catOf(A,g);(grp[c.id]=grp[c.id]||{c:c.c,items:[]}).items.push(g)});
+  Object.keys(grp).forEach(function(k){var G=grp[k],sh=shades(G.c,G.items.length);G.items.forEach(function(g,i){g.color=sh[i]})});save();renderAll();toast("已依分類重新配色（可按復原）")};
+$("legAll").onchange=function(){S.legGroupAll=this.checked;save();renderSide()};
+$("legend").addEventListener("click",function(e){var c=e.target.dataset.addin;if(!c)return;e.stopPropagation();addLegIn(c)});
+function addLegIn(cid){var A=act(),C=catById(cid),same=A.legend.filter(function(x){return catOf(A,x).id===cid}).length;
+  var col=C?shades(C.c,Math.max(3,same+1))[same%Math.max(3,same+1)]:PALETTE[0];var g=leg("",col);if(cid!==inferCat(A.name))g.cat=cid;else g.cat=cid;A.legend.push(g);A.curLeg=g.id;save();renderAll();var inp=document.querySelector('[data-lab="'+g.id+'"]');if(inp)inp.focus()}
 $("addLeg").onclick=function(){var A=act();var used=A.legend.map(function(x){return x.color});
   var c=PALETTE.filter(function(p){return used.indexOf(p)<0})[0]||PALETTE[A.legend.length%PALETTE.length];
   var g=leg("",c);A.legend.push(g);A.curLeg=g.id;save();renderAll();var inp=document.querySelector('[data-lab="'+g.id+'"]');if(inp)inp.focus()};
 $("baseSeg").onclick=function(e){if(e.target.dataset.v){S.base=e.target.dataset.v;save();renderAll()}};
-$("badgeSeg").onclick=function(e){if(e.target.dataset.v){S.badge=e.target.dataset.v;save();renderAll()}};
+$("badgeSeg").onclick=function(e){var v=e.target.dataset.v;if(!v)return;var BS=bset();if(BS[v])delete BS[v];else BS[v]=1;save();renderAll()};
 $("fillK").oninput=function(){S.fillK=this.value/100;$("fkv").textContent=this.value+"%";save();renderFills()};
 $("poiSeg").onclick=function(e){var v=e.target.dataset.v;if(!v)return;S.showPoi=v!=="off";S.poiLabel=v==="on";save();renderAll()};
 $("placeSeg").onclick=function(e){if(e.target.dataset.v){S.lblPlace=e.target.dataset.v;save();renderAll()}};
 $("scopeSeg").onclick=function(e){if(e.target.dataset.v){S.lblScope=e.target.dataset.v;save();renderAll()}};
 $("lblReset").onclick=function(){if(S.lblPlace==="on")S.labelPosOn={};else S.labelPos={};save();renderAll();toast("已重新自動排位")};
 $("title").addEventListener("input",function(){S.title=this.value;save()});
-$("tbody").addEventListener("input",function(e){var t=e.target;if(t.dataset.b){S.buildings[t.dataset.b][t.dataset.f]=t.value;save();if(S.badge!=="id")renderMap()}});
+$("tbody").addEventListener("input",function(e){var t=e.target;if(t.dataset.b){S.buildings[t.dataset.b][t.dataset.f]=t.value;save();renderMap()}});
 $("clearLayerBtn").onclick=function(){var A=act();if(this.dataset.arm){A.fills={};A.lines=[];A.markers=[];A.tents=[];delete this.dataset.arm;this.textContent="清空本層標註";save();renderAll();toast("已清空")}else{this.dataset.arm=1;this.textContent="再按一次確認清空";var self=this;setTimeout(function(){delete self.dataset.arm;self.textContent="清空本層標註"},3000)}};
 $("resetBtn").onclick=function(){if(this.dataset.arm){S=freshState();save();renderTable();renderAll();delete this.dataset.arm;this.textContent="全部重設";toast("已重設")}else{this.dataset.arm=1;this.textContent="再按一次確認重設";var self=this;setTimeout(function(){delete self.dataset.arm;self.textContent="全部重設"},3000)}};
 
@@ -1085,7 +1128,7 @@ function cList(){var c=cfg();if(!c.url){$("cStatus").innerHTML='<span style="col
   $("cStatus").textContent="連線中…";
   cGet({action:"list"}).then(function(j){$("cStatus").innerHTML='<span style="color:#2e7d4f">● 已連線</span>（'+j.items.length+' 筆）';cRender(j.items)}).catch(function(e){$("cStatus").innerHTML='<span style="color:#b3412a">連線失敗：'+esc(e.message)+'</span>';$("cSet").style.display="block"})}
 function cLoad(name){return cGet({action:"get",name:name}).then(function(j){var o=JSON.parse(j.item.json);
-  if(o.kind==="shared"){S.buildings=o.buildings||S.buildings;S.pois=o.pois||S.pois;IDS.forEach(function(k){if(!S.buildings[k])S.buildings[k]={official:"",camp:"",note:""}})}
+  if(o.kind==="shared"){S.buildings=o.buildings||S.buildings;S.pois=o.pois||S.pois;if(o.cats)S.cats=o.cats;IDS.forEach(function(k){if(!S.buildings[k])S.buildings[k]={official:"",camp:"",note:""}})}
   else{var L=applyLayerObj(o);S.active=L.id}})}
 if(CLOUD_ENABLED){
   $("cloudH").style.display="";$("cloudBox").style.display="";
@@ -1097,7 +1140,7 @@ if(CLOUD_ENABLED){
   $("cUp").onclick=function(){var A=act(),c=cfg();if(!c.url){toast("請先設定雲端網址");return}var btn=this;btn.disabled=true;
     cPost({action:"save",name:A.name,kind:"layer",by:c.by||"",json:JSON.stringify({kind:"layer",idv:3,cv:2,layer:A})}).then(function(){toast("已上傳「"+A.name+"」");cList()}).catch(function(e){toast("上傳失敗："+e.message)}).then(function(){btn.disabled=false})};
   $("cUpS").onclick=function(){var c=cfg();if(!c.url){toast("請先設定雲端網址");return}
-    cPost({action:"save",name:"__shared__",kind:"shared",by:c.by||"",json:JSON.stringify({kind:"shared",buildings:S.buildings,pois:S.pois})}).then(function(){toast("已上傳建築主檔與地標");cList()}).catch(function(e){toast("上傳失敗："+e.message)})};
+    cPost({action:"save",name:"__shared__",kind:"shared",by:c.by||"",json:JSON.stringify({kind:"shared",buildings:S.buildings,pois:S.pois,cats:S.cats})}).then(function(){toast("已上傳建築主檔與地標");cList()}).catch(function(e){toast("上傳失敗："+e.message)})};
   $("cList").addEventListener("click",function(e){var n=e.target.dataset.cload;if(n==null)return;cLoad(n).then(function(){save();renderTable();renderAll();toast("已載入")}).catch(function(e){toast("載入失敗："+e.message)})});
   $("cAll").onclick=function(){cGet({action:"all"}).then(function(j){j.items.forEach(function(it){var o=JSON.parse(it.json);if(o.kind==="shared"){S.buildings=o.buildings||S.buildings;S.pois=o.pois||S.pois}else applyLayerObj(o)});save();renderTable();renderAll();toast("已載入 "+j.items.length+" 筆")}).catch(function(e){toast("載入失敗："+e.message)})};
   setTimeout(cList,300);
@@ -1117,17 +1160,17 @@ $("pngBtn").onclick=function(){
   var c=document.createElement("canvas"),ctx=c.getContext("2d");
   // legend layout
   ctx.font="14px "+FONT;
-  var rows=[],colW=0;
-  vis.forEach(function(l){var items=l.legend.filter(function(g){
-      return legUsedInFills(l,g.id)||(l.tents||[]).some(function(x){return x.legId===g.id})||l.lines.some(function(x){return x.legId===g.id})||l.markers.some(function(x){return x.legId===g.id})});
-    if(items.length)rows.push({l:l,items:items})});
+  var rows=[],colW=0,byC={};
+  vis.forEach(function(l){l.legend.forEach(function(g){
+      if(legUsedInFills(l,g.id)||(l.tents||[]).some(function(x){return x.legId===g.id})||l.lines.some(function(x){return x.legId===g.id})||l.markers.some(function(x){return x.legId===g.id})){var c=catOf(l,g);(byC[c.id]=byC[c.id]||[]).push({l:l,g:g})}})});
+  cats().forEach(function(c){if(byC[c.id])rows.push({cat:c,items:byC[c.id]})});
   var CR=cropRect()||[0,0,W,H],CW=CR[2]-CR[0],CH=CR[3]-CR[1],Z=CW<1100?Math.min(1.4,1100/CW):1,OW=CW*Z,OH=CH*Z;
-  var lineH=26,LX0=36,LXI=S.expLayerName?166:36,LXM=OW-30,legItems=[],ln=0;
+  var lineH=26,LX0=36,LXI=166,LXM=OW-30,legItems=[],ln=0;
   ctx.font="14px "+FONT;
   rows.forEach(function(r,ri){var x=LXI;if(ri>0)ln++;r.line=ln;
-    r.items.forEach(function(g){var gt=(g.venue?g.venue+"｜":"")+(g.label||"（未命名）"),w=24+ctx.measureText(gt).width+26;
+    r.items.forEach(function(it0){var g=it0.g,gt=(g.venue?g.venue+"｜":"")+(g.label||"（未命名）")+(S.expBName!==false?bnames(it0.l,g.id):""),w=24+ctx.measureText(gt).width+26;
       if(x+w-26>LXM&&x>LXI){ln++;x=LXI}
-      legItems.push({r:r,g:g,gt:gt,x:x,line:ln});x+=w})});
+      legItems.push({l:it0.l,g:g,gt:gt,x:x,line:ln});x+=w})});
   var legH=rows.length?(ln+1)*lineH+34:0;
   var HD=96;c.width=Math.round(OW*2);c.height=Math.round((HD+OH+legH)*2);ctx.scale(2,2);
   ctx.fillStyle="#fbfaf7";ctx.fillRect(0,0,OW,HD+OH+legH);ctx.translate(0,HD);
@@ -1151,10 +1194,10 @@ $("pngBtn").onclick=function(){
     // legend strip
     if(rows.length){
       ctx.fillStyle="#fff";ctx.fillRect(0,OH,OW,legH);ctx.fillStyle="#e3e7ea";ctx.fillRect(0,OH,OW,1);
-      rows.forEach(function(r){var y=OH+24+r.line*lineH;ctx.fillStyle="#1a6a88";ctx.font="bold 14px "+FONT;if(S.expLayerName)ctx.fillText(r.l.name,LX0,y+5)});
+      rows.forEach(function(r){var y=OH+24+r.line*lineH;ctx.fillStyle=r.cat.c;ctx.fillRect(LX0,y-8,4,16);ctx.font="bold 14px "+FONT;ctx.fillText(r.cat.n,LX0+12,y+5)});
       ctx.font="14px "+FONT;
       legItems.forEach(function(it){
-        var y=OH+24+it.line*lineH,x=it.x,g=it.g,l=it.r.l;
+        var y=OH+24+it.line*lineH,x=it.x,g=it.g,l=it.l;
         var isLine=l.lines.some(function(z){return z.legId===g.id}),isMk=l.markers.some(function(z){return z.legId===g.id}),isFill=legUsedInFills(l,g.id)||(l.tents||[]).some(function(x){return x.legId===g.id});
         ctx.fillStyle=g.color;
         if(isFill){ctx.globalAlpha=.9;ctx.fillRect(x,y-7,16,14);ctx.globalAlpha=1}
