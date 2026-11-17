@@ -189,7 +189,7 @@ td.use span{display:inline-block;border-radius:9px;padding:1px 7px;margin:1px 2p
       <label class="lbl">團隊密碼（沒設可留空）</label><input id="cKey" class="btn sm" style="width:100%;text-align:left">
       <div class="row"><button class="btn sm pri" id="cSave">儲存設定</button></div>
     </div>
-    <label class="lbl" style="margin-top:0">你的名字（顯示是誰上傳的）</label><input id="cBy" class="btn sm" style="width:100%;text-align:left" placeholder="例如：小海豚">
+    <label class="lbl" style="margin-top:0">你的名字（顯示是誰上傳的）</label><input id="cBy" class="btn sm" style="width:100%;text-align:left" placeholder="例如：浩文">
     <div class="row"><button class="btn sm pri" id="cUp">上傳本層</button><button class="btn sm" id="cUpS" title="建築名稱、地標">上傳主檔與地標</button></div>
     <div class="row"><button class="btn sm" id="cRefresh">重新整理清單</button><button class="btn sm" id="cAll">全部載入</button><button class="btn sm" id="cCfg">設定</button></div>
     <div id="cList" style="margin-top:6px;border:1px solid var(--line);border-radius:7px;max-height:220px;overflow:auto"></div>
@@ -1071,10 +1071,10 @@ $("importFile").onchange=function(){
 };
 
 /* ---------- cloud (Google Apps Script) ---------- */
-var CLOUD_ENABLED=true;
+var CLOUD_ENABLED=true,DEF_URL="https://script.google.com/macros/s/AKfycbwyQRYBqYpsdjiQQ_GEEWzVthngSq3OEmlZmzbk1NS83D5nejnVOodPEBCw5z85Y_2Aig/exec",DEF_KEY="siapublic";
 function applyLayerObj(o){var L=JSON.parse(JSON.stringify(o.layer));var i=S.layers.findIndex(function(x){return x.name===L.name});
   if(i>=0){L.id=S.layers[i].id;S.layers[i]=L}else{L.id=uid();S.layers.push(L)}L.visible=true;return L}
-function cfg(){var c={};try{c=JSON.parse(localStorage.getItem("cy-camp-cloud")||"{}")}catch(e){}if(!c.url&&window.SCRIPT_URL)c.url=window.SCRIPT_URL;if(!c.key&&window.TEAM_KEY)c.key=window.TEAM_KEY;return c}
+function cfg(){var c={};try{c=JSON.parse(localStorage.getItem("cy-camp-cloud")||"{}")}catch(e){}if(!c.url)c.url=window.SCRIPT_URL||DEF_URL;if(!c.key)c.key=window.TEAM_KEY||DEF_KEY;return c}
 function setCfg(c){try{localStorage.setItem("cy-camp-cloud",JSON.stringify(c))}catch(e){}}
 function cGet(params){var c=cfg();var q=Object.keys(params).map(function(k){return k+"="+encodeURIComponent(params[k])}).join("&");return fetch(c.url+"?"+q+"&key="+encodeURIComponent(c.key||"")).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||"失敗");return j})}
 function cPost(body){var c=cfg();body.key=c.key||"";return fetch(c.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||"失敗");return j})}
