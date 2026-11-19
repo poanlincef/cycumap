@@ -428,7 +428,7 @@ function layoutLabels(){
   var items=labelItems();if(!items.length)return [];
   var obs=[];
   S.layers.forEach(function(l){if(!l.visible)return;l.markers.forEach(function(m){obs.push([m.x-15,m.y-15,m.x+22+(m.label?textW(m.label)+4:0),m.y+15])});
-    (l.tents||[]).forEach(function(t){var hw=8*(t.w||1)+8;obs.push([t.x-hw,t.y-18,t.x+hw,t.y+(t.label?18:4)])})});
+    (l.tents||[]).forEach(function(t){var z=t.size||1,hw=9*z*(t.w||1)+3,hh2=9*z+3;obs.push([t.x-hw,t.y-hh2,t.x+hw,t.y+hh2]);if(t.label){var tw=textW(t.label),sd=t.side||"b";if(sd==="r")obs.push([t.x+hw,t.y-9,t.x+hw+tw+6,t.y+9]);else if(sd==="l")obs.push([t.x-hw-tw-6,t.y-9,t.x-hw,t.y+9]);else{var yy=sd==="t"?t.y-hh2-18:t.y+hh2-1;obs.push([t.x-tw/2-3,yy,t.x+tw/2+3,yy+16])}}})});
   visPois().forEach(function(p){var tw=S.poiLabel!==false&&p.label?textW(p.label):0,sd=p.side||"r";obs.push([p.x-13,p.y-13,p.x+13,p.y+13]);if(tw){if(sd==="r")obs.push([p.x+14,p.y-9,p.x+18+tw,p.y+9]);else if(sd==="l")obs.push([p.x-18-tw,p.y-9,p.x-14,p.y+9]);else{var yy=sd==="t"?p.y-28:p.y+14;obs.push([p.x-tw/2-3,yy,p.x+tw/2+3,yy+15])}}});
   var ON=S.lblPlace==="on",LP=lpStore();
   var CB=cropRect()||[0,0,W,H];CB=[Math.max(0,CB[0]),Math.max(0,CB[1]),Math.min(W,CB[2]),Math.min(H,CB[3])];
@@ -656,17 +656,15 @@ function poiSvg(p,editable){var T=POI_TYPES[p.type]||POI_TYPES.star;
   return s+'</g>';}
 function shadeHex(c,k){var r=hex2rgb(c);return "rgb("+r.map(function(v){return Math.round(k>1?255-(255-v)/k:v*k)}).join(",")+")"}
 function tentSvg(t,color,lid,editable){
-  var u=18,Wd=u*(t.w||1),Hh=8,D=9,Sx=7,x0=-Wd/2;
-  var top=[[x0+Sx,-Hh-D],[x0+Wd+Sx,-Hh-D],[x0+Wd,-Hh],[x0,-Hh]],side=[[x0+Wd,-Hh],[x0+Wd+Sx,-Hh-D],[x0+Wd+Sx,-D],[x0+Wd,0]];
-  var P=function(a){return a.map(function(q){return q[0].toFixed(1)+","+q[1].toFixed(1)}).join(" ")};
+  var u=18*(t.size||1),n=t.w||1,Wd=u*n,x0=-Wd/2,y0=-u/2;
   var cls=editable?' class="ed tent" data-k="tent" data-id="'+t.id+'" data-l="'+lid+'" style="cursor:move"':' class="tent"';
-  var s='<g'+cls+' transform="translate('+t.x+','+t.y+') rotate('+(t.rot||0)+')">'+
-    '<polygon points="'+P(side)+'" fill="'+shadeHex(color,.62)+'" stroke="#2b3338" stroke-width="1" stroke-linejoin="round"/>'+
-    '<rect x="'+x0+'" y="'+(-Hh)+'" width="'+Wd+'" height="'+Hh+'" fill="'+color+'" stroke="#2b3338" stroke-width="1"/>'+
-    '<polygon points="'+P(top)+'" fill="'+shadeHex(color,2.2)+'" stroke="#2b3338" stroke-width="1" stroke-linejoin="round"/>';
-  for(var i=1;i<(t.w||1);i++){var xx=x0+u*i;s+='<path d="M'+xx+' '+(-Hh)+'L'+(xx+Sx)+' '+(-Hh-D)+'M'+xx+' '+(-Hh)+'V0" stroke="#2b3338" stroke-width=".7" opacity=".6"/>'}
+  var s='<g'+cls+' transform="translate('+t.x+','+t.y+') rotate('+(t.rot||0)+')">';
+  for(var i=0;i<n;i++){var a=x0+u*i,b=a+u;
+    s+='<rect x="'+a+'" y="'+y0+'" width="'+u+'" height="'+u+'" fill="'+color+'" stroke="#2b3338" stroke-width="1.4"/>'+
+      '<path d="M'+a+' '+y0+'L'+b+' '+(y0+u)+'M'+b+' '+y0+'L'+a+' '+(y0+u)+'" stroke="#2b3338" stroke-width="1.1"/>'}
   s+='</g>';
-  if(t.label)s+='<text x="'+t.x+'" y="'+(t.y+14)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#22313a" stroke="#fff" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round" font-family="'+FONTS+'" pointer-events="none">'+esc(t.label)+'</text>';
+  if(t.label){var sd=t.side||"b",hw=Wd/2+5,tx=t.x+(sd==="l"?-hw:sd==="r"?hw:0),ty=t.y+(sd==="t"?-u/2-6:sd==="b"?u/2+14:4.5),ta=sd==="l"?"end":sd==="r"?"start":"middle";
+    s+='<text x="'+tx+'" y="'+ty+'" text-anchor="'+ta+'" font-size="11" font-weight="700" fill="#22313a" stroke="#fff" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round" font-family="'+FONTS+'" pointer-events="none">'+esc(t.label)+'</text>'}
   return s;
 }
 
@@ -751,7 +749,7 @@ var TOOLS=[
   {k:"walk",n:"人流（實線）",i:'<path d="M3 18C8 6 14 18 21 6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M21 6l-1 5-4-3z" fill="currentColor"/>',h:"依序點出路線，雙擊或按 Enter 結束；畫到一半按 Backspace 退一點、Esc 放棄。畫好的路線點一下可刪除或改虛實線。"},
   {k:"car",n:"車流（虛線）",i:'<path d="M3 18C8 6 14 18 21 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3"/><path d="M21 6l-1 5-4-3z" fill="currentColor"/>',h:"依序點出路線，雙擊或按 Enter 結束；Esc 取消。"},
   {k:"marker",n:"編號站點",i:'<circle cx="12" cy="12" r="8" fill="currentColor"/><text x="12" y="16" font-size="11" text-anchor="middle" fill="#fff" font-weight="700">1</text>',h:"點地圖放一個編號圓點並輸入說明。點本層既有站點可修改說明。"},
-  {k:"tent",n:"棚子",i:'<path d="M4 11h13l3-4H7z" fill="currentColor" opacity=".45" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="11" width="13" height="6" fill="currentColor"/>',h:"點地圖放一個棚子（用目前圖例的顏色），放下後直接輸入名稱，例如「智信樓發餐點」。拖曳可移動；點一下可改名、加寬、旋轉、複製或刪除。左側清單也能直接改名。"},
+  {k:"tent",n:"棚子",i:'<rect x="5" y="5" width="14" height="14" fill="currentColor" opacity=".35" stroke="currentColor" stroke-width="1.6"/><path d="M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="1.4"/>',h:"點地圖放一個棚子（用目前圖例的顏色），放下後直接輸入名稱，例如「智信樓發餐點」。拖曳可移動；點一下可改名、加寬、旋轉、複製或刪除。左側清單也能直接改名。"},
   {k:"poi",n:"地標圖示",i:'<circle cx="12" cy="12" r="8" fill="currentColor"/><path d="M8 11h8v2H8z" fill="#fff"/>',h:"先在下方選圖示種類，再點地圖放置。地標是全營共用的，但每個圖層可以在左下「本層顯示的地標」勾選要顯示哪些。拖曳可移動，點一下可改名或刪除。"},
   {k:"hide",n:"隱藏建築",i:'<rect x="4" y="7" width="12" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2"/><path d="M3 20L21 4" stroke="currentColor" stroke-width="2"/>',h:"點建築＝在本層把它從地圖上抹掉（變空白），再點一次恢復。用這個工具時，被隱藏的建築會以淡橘色顯示方便找回。"},
   {k:"pan",n:"移動地圖",i:'<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3" fill="none" stroke="currentColor" stroke-width="1.8"/>',h:"按住拖曳移動地圖；滾動滑鼠滾輪縮放。比例與縮放在左上「地圖範圍」設定。"},
@@ -928,7 +926,16 @@ function openObjPop(kind,o){opObj=o;opKind=kind;var pop=$("objPop"),box=$("mapbo
   if(kind==="poi"){
     h='<input id="opLab" placeholder="名稱，例如：星巴克" value="'+esc(o.label||"")+'" style="width:150px"><select id="opType" class="btn sm">'+Object.keys(POI_TYPES).map(function(k){return '<option value="'+k+'"'+(k===o.type?' selected':'')+'>'+POI_TYPES[k].n+'</option>'}).join("")+'</select><span style="font-size:12px;color:var(--muted);align-self:center;margin-left:2px">文字</span><span class="seg" id="opSide" style="display:inline-flex">'+[["l","←左"],["t","↑上"],["b","↓下"],["r","右→"]].map(function(x){return '<button data-sd="'+x[0]+'" class="'+((o.side||"r")===x[0]?'on':'')+'" style="padding:3px 6px;font-size:12px">'+x[1]+'</button>'}).join("")+'</span><button class="btn sm warn" id="opDel">刪除</button><button class="btn sm pri" id="opOk">確定</button>';
   }else{
-    h='<input id="opLab" placeholder="棚子名稱，例如：智信樓發餐點" value="'+esc(o.label||"")+'" style="width:100%;margin-bottom:2px"><select id="opLeg" class="btn sm" title="改用哪個圖例（顏色）">'+act().legend.map(function(g){return '<option value="'+g.id+'"'+(g.id===o.legId?' selected':'')+'>● '+esc((g.venue?g.venue+"｜":"")+(g.label||"未命名"))+'</option>'}).join("")+'</select><button class="btn sm" id="opW-">窄</button><button class="btn sm" id="opW+">寬</button><button class="btn sm" id="opR-">↺</button><button class="btn sm" id="opR+">↻</button><button class="btn sm" id="opDup">複製</button><button class="btn sm warn" id="opDel">刪除</button><button class="btn sm pri" id="opOk">確定</button>';
+    var adv=!!S.tentAdv,row=function(lbl,inner){return '<div style="display:flex;align-items:center;gap:6px;width:100%;margin-top:4px"><span style="font-size:12px;color:var(--muted);width:52px;flex:none">'+lbl+'</span>'+inner+'</div>'};
+    h='<input id="opLab" placeholder="棚子名稱，例如：智信樓發餐點" value="'+esc(o.label||"")+'" style="width:100%;margin-bottom:2px">'+
+      '<div style="display:flex;gap:6px;width:100%;align-items:center"><select id="opLeg" class="btn sm" style="flex:1;min-width:0" title="顏色（圖例）">'+act().legend.map(function(g){return '<option value="'+g.id+'"'+(g.id===o.legId?' selected':'')+'>● '+esc((g.venue?g.venue+"｜":"")+(g.label||"未命名"))+'</option>'}).join("")+'</select><button class="btn sm warn" id="opDel">刪除</button><button class="btn sm pri" id="opOk">確定</button></div>'+
+      '<button class="btn sm" id="opAdv" style="width:100%;margin-top:5px;text-align:left;border-style:dashed">'+(adv?'▾ 收合調整':'▸ 更多調整（文字位置、大小、寬窄、旋轉、複製）')+'</button>'+
+      '<div id="opAdvBox" style="display:'+(adv?'block':'none')+';width:100%">'+
+        row('文字','<span class="seg" id="opSide" style="display:inline-flex">'+[["l","←"],["t","↑"],["b","↓"],["r","→"]].map(function(x){return '<button data-sd="'+x[0]+'" class="'+((o.side||"b")===x[0]?'on':'')+'" style="padding:3px 8px;font-size:12px">'+x[1]+'</button>'}).join("")+'</span>')+
+        row('大小','<button class="btn sm" id="opS-">－</button><span id="opSv" style="font-size:12px;width:38px;text-align:center">'+Math.round((o.size||1)*100)+'%</span><button class="btn sm" id="opS+">＋</button>')+
+        row('寬度','<button class="btn sm" id="opW-">－</button><span id="opWv" style="font-size:12px;width:38px;text-align:center">'+(o.w||1)+' 格</span><button class="btn sm" id="opW+">＋</button>')+
+        row('旋轉','<button class="btn sm" id="opR-">↺</button><button class="btn sm" id="opR+">↻</button><button class="btn sm" id="opDup" style="margin-left:auto">複製一個</button>')+
+      '</div>';
   }
   pop.innerHTML=h;pop.style.display="flex";
   var x=toBX(o.x)+16,y=toBY(o.y)+14;if(x+340>box.width)x=box.width-345;pop.style.left=x+"px";pop.style.top=y+"px";
@@ -939,12 +946,17 @@ function openObjPop(kind,o){opObj=o;opKind=kind;var pop=$("objPop"),box=$("mapbo
     $("opSide").onclick=function(e){var v=e.target.dataset.sd;if(!v)return;o.side=v;[].forEach.call(this.children,function(b){b.classList.toggle("on",b.dataset.sd===v)});save();renderMap()}}
   else{
     var bump=function(f){o.label=$("opLab").value.trim();f();save();renderMap()};
+    $("opSide").onclick=function(e){var v=e.target.dataset.sd;if(!v)return;o.side=v;[].forEach.call(this.children,function(b){b.classList.toggle("on",b.dataset.sd===v)});save();renderMap()};
     $("opLeg").onchange=function(){var v=this.value;bump(function(){o.legId=v});renderAll()};
-    $("opW-").onclick=function(){bump(function(){o.w=Math.max(1,(o.w||1)-1)})};
-    $("opW+").onclick=function(){bump(function(){o.w=Math.min(8,(o.w||1)+1)})};
+    var upd=function(){$("opSv").textContent=Math.round((o.size||1)*100)+"%";$("opWv").textContent=(o.w||1)+" 格"};
+    $("opAdv").onclick=function(){S.tentAdv=!S.tentAdv;$("opAdvBox").style.display=S.tentAdv?"block":"none";this.textContent=S.tentAdv?"▾ 收合調整":"▸ 更多調整（文字位置、大小、寬窄、旋轉、複製）";save()};
+    $("opS-").onclick=function(){bump(function(){o.size=Math.max(.5,Math.round(((o.size||1)-.1)*10)/10)});upd()};
+    $("opS+").onclick=function(){bump(function(){o.size=Math.min(2.5,Math.round(((o.size||1)+.1)*10)/10)});upd()};
+    $("opW-").onclick=function(){bump(function(){o.w=Math.max(1,(o.w||1)-1)});upd()};
+    $("opW+").onclick=function(){bump(function(){o.w=Math.min(8,(o.w||1)+1)});upd()};
     $("opR-").onclick=function(){bump(function(){o.rot=((o.rot||0)-15)})};
     $("opR+").onclick=function(){bump(function(){o.rot=((o.rot||0)+15)})};
-    $("opDup").onclick=function(){var A=act(),c=JSON.parse(JSON.stringify(o));c.id=uid();c.x+=19*(o.w||1)+4;c.label="";A.tents=A.tents||[];A.tents.push(c);save();closeObjPop();renderAll();openObjPop("tent",c)};
+    $("opDup").onclick=function(){var A=act(),c=JSON.parse(JSON.stringify(o));c.id=uid();c.x+=Math.round((18*(o.size||1))*(o.w||1)+4);c.label="";A.tents=A.tents||[];A.tents.push(c);save();closeObjPop();renderAll();openObjPop("tent",c)};
   }
   var i0=$("opLab");if(i0)i0.focus();setTimeout(function(){var i=$("opLab");if(i&&document.activeElement!==i)i.focus()},10);
 }
